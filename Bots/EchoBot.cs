@@ -14,7 +14,13 @@ namespace Microsoft.BotBuilderSamples.Bots
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
             var name = turnContext.Activity.Text;
-            var replyText = $"Hello , {name}";
+            var f = System.IO.Path.Combine(System.Environment.CurrentDirectory, @"worldcities.csv");
+            var cd = new CountryData(f);
+            var cap = cd.GetCapital(name);
+            var replyText = cap == null
+                ? $"Capital of {name} not found"
+                : $"The Capital of {name} is {cap}";
+
             await turnContext.SendActivityAsync(replyText);
             /*
             var replyText = $"Echo: {turnContext.Activity.Text}";
