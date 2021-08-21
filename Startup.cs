@@ -7,6 +7,7 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Bot.Builder.AI.Luis;
 
 using Microsoft.BotBuilderSamples.Bots;
 using Microsoft.Extensions.Hosting;
@@ -25,6 +26,12 @@ namespace Microsoft.BotBuilderSamples
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var luisApplication = new LuisApplication(
+                Configuration["70b82e3a-f675-456e-a3e9-15030e73515d"],
+                Configuration["a7c8b84b391b478b977876163b74131c"],
+                Configuration["https://westus.api.cognitive.microsoft.com/"]);
+            services.AddSingleton(new LuisRecognizer(luisApplication));
+
             services.AddControllers().AddNewtonsoftJson();
 
             // Create the Bot Framework Adapter with error handling enabled.

@@ -6,27 +6,25 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
+using Microsoft.Bot.Builder.AI.Luis;
+
 
 namespace Microsoft.BotBuilderSamples.Bots
 {
     public class EchoBot : ActivityHandler
     {
-        protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
-        {
-            var name = turnContext.Activity.Text;
-            var f = System.IO.Path.Combine(System.Environment.CurrentDirectory, @"worldcities.csv");
-            var cd = new CountryData(f);
-            var cap = cd.GetCapital(name);
-            var replyText = cap == null
-                ? $"Capital of {name} not found"
-                : $"The Capital of {name} is {cap}";
+        LuisRecognizer rec;
 
-            await turnContext.SendActivityAsync(replyText);
-            /*
-            var replyText = $"Echo: {turnContext.Activity.Text}";
-            await turnContext.SendActivityAsync(MessageFactory.Text(replyText, replyText), cancellationToken);
-            */
-        }
+        public EchoBot(LuisRecognizer rec)
+        {
+        this.rec = rec;
+    }
+       protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
+{
+    var res = await rec.RecognizeAsync(turnContext, cancellationToken);
+    await turnContext.SendActivityAsync(res.GetTopScoringIntent().ToString());
+    await turnContext.SendActivityAsync(res.Entities.ToString());
+}
 
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
